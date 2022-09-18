@@ -38,7 +38,7 @@ para_est = function(x, y, meta_data, formula, tol, max_iter) {
         beta_i[match(names(coef_i), covariates)] = coef_i
         return(beta_i)
     })
-    beta = Reduce('rbind', beta)
+    beta = do.call('rbind', beta)
 
     # Iterative least square
     iterNum = 0
@@ -55,7 +55,7 @@ para_est = function(x, y, meta_data, formula, tol, max_iter) {
             beta_i[match(names(coef_i), covariates)] = coef_i
             return(beta_i)
         })
-        beta_new = Reduce('rbind', beta_new)
+        beta_new = do.call('rbind', beta_new)
 
         # Updating d
         y_hat = lapply(fits, function(i) {
@@ -65,7 +65,7 @@ para_est = function(x, y, meta_data, formula, tol, max_iter) {
             return(y_hat_i)
 
         })
-        y_hat = Reduce('rbind', y_hat)
+        y_hat = do.call('rbind', y_hat)
         d_new = colMeans(y - y_hat, na.rm = TRUE)
 
         # Iteration
@@ -84,7 +84,7 @@ para_est = function(x, y, meta_data, formula, tol, max_iter) {
         return(y_hat_i)
 
     })
-    y_hat = Reduce('rbind', y_hat)
+    y_hat = do.call('rbind', y_hat)
     e = t(t(y - y_hat) - d)
 
     # Variance-covariance matrices of coefficients

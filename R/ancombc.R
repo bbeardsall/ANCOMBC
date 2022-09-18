@@ -170,7 +170,7 @@
 ancombc = function(phyloseq, formula, p_adj_method = "holm", prv_cut = 0.10,
                    lib_cut = 0, group = NULL, struc_zero = FALSE,
                    neg_lb = FALSE, tol = 1e-05, max_iter = 100,
-                   conserve = FALSE, alpha = 0.05, global = FALSE){
+                   conserve = FALSE, alpha = 0.05, global = FALSE, cores = 1){
   # 1. Data pre-processing
   fiuo_core = data_core(phyloseq, prv_cut, lib_cut,
                         tax_keep = NULL, samp_keep = NULL)
@@ -215,7 +215,7 @@ ancombc = function(phyloseq, formula, p_adj_method = "holm", prv_cut = 0.10,
   var_hat = fiuo_para$var_hat
 
   # 4. Estimation of the sample-specific bias
-  fiuo_bias = bias_est(beta, var_hat, tol, max_iter)
+  fiuo_bias = bias_est(beta, var_hat, tol, max_iter, cores)
   delta_em = fiuo_bias$delta_em
   delta_wls = fiuo_bias$delta_wls
   var_delta = fiuo_bias$var_delta
@@ -290,6 +290,3 @@ ancombc = function(phyloseq, formula, p_adj_method = "holm", prv_cut = 0.10,
              res = res, res_global = res_global)
   return(out)
 }
-
-
-

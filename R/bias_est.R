@@ -1,9 +1,9 @@
 # E-M algorithm for estimating the bias term
-bias_est = function(beta, var_hat, tol, max_iter) {
+bias_est = function(beta, var_hat, tol, max_iter, cores) {
     delta_em = rep(NA, ncol(beta) - 1)
     delta_wls = rep(NA, ncol(beta) - 1)
     var_delta = rep(NA, ncol(beta) - 1)
-    for (i in seq_along(delta_em)) {
+      em_function <- function(i, delta_em, delta_wls, var_delta, beta, var_hat, tol, max_iter){
         # Ignore the intercept
         Delta = beta[, i + 1]
         Delta = Delta[!is.na(Delta)]
@@ -132,7 +132,7 @@ bias_est = function(beta, var_hat, tol, max_iter) {
         }
 
         # The EM estimator of bias
-        delta_em[i] = delta_new
+        delta_em = delta_new
 
         # The WLS estimator of bias
         pi1 = pi1_new
@@ -160,14 +160,25 @@ bias_est = function(beta, var_hat, tol, max_iter) {
         wls_nume[C2] = (wls_nume * (Delta - l2))[C2]
         wls_nume = sum(wls_nume)
 
-        delta_wls[i] = wls_nume / wls_deno
+        delta_wls = wls_nume / wls_deno
 
         # Estimate the variance of bias
-        var_delta[i] = 1 / wls_deno
-        if (is.na(var_delta[i])) var_delta[i] = 0
+        var_delta = 1 / wls_deno
+        if (is.na(var_delta)) var_delta = 0
+
+        result_vector <- c(delta_em, delta_wls, var_delta)
+        names(result_vector) <- c("delta_em", "delta_wls", "var_delta")
+
+        return(result_vector)
     }
 
-    fiuo_bias = list(delta_em = delta_em, delta_wls = delta_wls,
-                     var_delta = var_delta)
+    results <- bettermc::mclapply(seq_along(delta_em), em_function,
+    delta_em = delta_em, delta_wls=delta_wls,var_delta=var_delta,
+    beta=beta, var_hat=var_hat,tol=tol,max_iter=max_iter, 
+    mc.cores = cores)
+
+    fiuo_bias <- as.list(as.data.frame(do.call(rbind, results)))
+
+    return(fiuo_bias)
 }
 
